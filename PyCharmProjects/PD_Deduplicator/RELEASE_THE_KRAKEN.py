@@ -1,15 +1,8 @@
 import pandas as pd
-import requests
-from bs4 import BeautifulSoup
 
 
-
-#webpage = requests.get('https://preprod.webapp.peakdata.com/fr-azsaphnelo/person-details/3520#publications', 'html5lib')
-#soup = BeautifulSoup(webpage.content)
-#print(webpage)
-# INPUT HERE KEYWORDS TO INCLUDE AND EXCLUDE FROM SEARCH
-keywords_incl = []
-keywords_excl = ['biolog', 'chemistry', 'anesthesia', 'gynecolog', 'Gynecolog']
+keywords_incl = []                                                              # fill in these (optional)
+keywords_excl = ['biolog', 'chemistry', 'anesthesia', 'gynecolog', 'Gynecolog'] # fill in these !!!
 result = []
 
 links = pd.read_excel('_input/input_links.xlsx')
@@ -42,5 +35,5 @@ for elem in merged.loc[merged['Check'] == 'Delete']['Link'].tolist():
     result.append(elem.replace('https://pubmed.ncbi.nlm.nih.gov/', ''))
 
 with open('_output/result.txt', 'w') as file:
-    file.write(str(result))
+    file.write(str(result).replace("'", ""))
 
