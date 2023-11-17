@@ -41,15 +41,15 @@ class Environment:
                     agent_1.score += 1
                     agent_2.score += 1
                 elif agent_1.strategy == 'hawk' and agent_1.strategy == agent_2.strategy:
-                    agent_1.score += 0.5
-                    agent_2.score += 0.5
+                    agent_1.score += hawk_hawk_score
+                    agent_2.score += hawk_hawk_score
                 else:
                     if agent_1.strategy == 'dove':
-                        agent_1.score += 0.5
-                        agent_2.score += 1.5
+                        agent_1.score += dove_hawk_score
+                        agent_2.score += 2 - dove_hawk_score
                     else:
-                        agent_1.score += 1.5
-                        agent_2.score += 0.5
+                        agent_1.score += 2 - dove_hawk_score
+                        agent_2.score += dove_hawk_score
 
 
 doves = [Dove(), Dove()]
@@ -57,6 +57,8 @@ hawks = [Hawk(), Hawk()]
 result = []
 input_iterations = int(input('How many iterations?\n'))
 
+hawk_hawk_score = float(input('Hawk/Hawk score?\n'))
+dove_hawk_score = float(input('Dove/Hawk score?\n'))
 
 ############## iteration starts here #####################
 
@@ -128,15 +130,15 @@ for i in range(input_iterations):
     for dove in doves:
         if dove.score == 0:
             new_doves.remove(dove)
-        elif dove.score == 0.5:
-            if random.randint(0,1) == 0:
+        elif 0 < dove.score < 1:
+            if random.random() > dove.score:
                 new_doves.remove(dove)
             else:
                 pass
         elif dove.score == 1:
             pass
-        elif dove.score == 1.5:
-            if random.randint(0,1) == 0:
+        elif 1 < dove.score < 2:
+            if random.random() + 1 > dove.score:
                 pass
             else:
                 new_doves.append(Dove())
@@ -145,15 +147,15 @@ for i in range(input_iterations):
     for hawk in hawks:
         if hawk.score == 0:
             new_hawks.remove(hawk)
-        elif hawk.score == 0.5:
-            if random.randint(0,1) == 0:
+        elif 0 < hawk.score < 1:
+            if random.random() > hawk.score:
                 new_hawks.remove(hawk)
             else:
                 pass
         elif hawk.score == 1:
             pass
-        elif hawk.score == 1.5:
-            if random.randint(0,1) == 0:
+        elif 1 < hawk.score < 2:
+            if random.random() + 1 > hawk.score:
                 pass
             else:
                 new_hawks.append(Hawk())
@@ -184,7 +186,8 @@ plt.stackplot(iterations, dove_counts, hawk_counts, labels=['Doves', 'Hawks'], c
 plt.xlabel('Iterations')
 plt.ylabel('Species Counts')
 plt.legend(loc='upper left')
-plt.title('Doves and Hawks Population Over Iterations')
+plt.title(f'Doves and Hawks Population Over Iterations\n Hawk-Hawk Score = {hawk_hawk_score} | '
+          f'Dove-Hawk Score = {dove_hawk_score}')
 
 # Display the legend
 
