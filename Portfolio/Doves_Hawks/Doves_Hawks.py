@@ -1,5 +1,4 @@
 import random
-
 import matplotlib.pyplot as plt
 from more_itertools import random_permutation
 
@@ -15,12 +14,12 @@ class Dove:
 
 class Hawk:
     counter = 0
-    def __init__(self):
+    def __init__(self, pile = None):
         self.name = f'Hawk_{self.counter}'
         Hawk.counter += 1
         self.strategy = 'hawk'
         self.score = 0
-
+        self.pile = pile
 
 class Environment:
     def __init__(self, agents, food_amount=50):
@@ -46,80 +45,92 @@ class Environment:
                     agent_2.score += 0.5
                 else:
                     if agent_1.strategy == 'dove':
-                        agent_1.score += 0
-                        agent_2.score += 2
+                        agent_1.score += 0.5
+                        agent_2.score += 1.5
                     else:
-                        agent_1.score += 2
-                        agent_2.score += 0
-    # for i in range(self.food):
-    #     play()
+                        agent_1.score += 1.5
+                        agent_2.score += 0.5
 
-#
-# for i in range(50):
-#     print(random.choice(['dove', 'hawk']))
 
 doves = [Dove(), Dove()]
-orig_doves = doves
 hawks = [Hawk(), Hawk()]
-orig_hawks = hawks
+result = []
+input_iterations = int(input('How many iterations?\n'))
 
-env = Environment([doves[0], doves[1], hawks[0], hawks[1]])
 
-start, end = 0, env.food_amount
-non_repeating_numbers_list = list(random_permutation(range(start, end))*2)
-random.shuffle(non_repeating_numbers_list)
+############## iteration starts here #####################
 
-process_piles = list()
+for i in range(input_iterations):
+    print('\n------------------------------------------------------------------------------------')
+    print(f'Iteration {i}')
+    env = Environment(doves + hawks)
 
-for dove in doves:
-    dove.pile = non_repeating_numbers_list[0]
-    process_piles.append(non_repeating_numbers_list[0])
-    non_repeating_numbers_list.pop(0)
+    for bird in env.agents:
+        bird.score = 0
 
-for hawk in hawks:
-    hawk.pile = non_repeating_numbers_list[0]
-    process_piles.append(non_repeating_numbers_list[0])
-    non_repeating_numbers_list.pop(0)
+    start, end = 0, env.food_amount
+    non_repeating_numbers_list = list(random_permutation(range(start, end))*2)
+    random.shuffle(non_repeating_numbers_list)
 
-process_piles = list(set(process_piles))
+    process_piles = list()
 
-# print(f'Processing {process_piles}')
-# print('----------------------------')
+    for dove in doves:
+        dove.pile = non_repeating_numbers_list[0]
+        process_piles.append(non_repeating_numbers_list[0])
+        non_repeating_numbers_list.pop(0)
 
-for pile in sorted(process_piles):
-    print(f'Pile is {pile}')
+    for hawk in hawks:
+        hawk.pile = non_repeating_numbers_list[0]
+        process_piles.append(non_repeating_numbers_list[0])
+        non_repeating_numbers_list.pop(0)
 
-    try:
-        instance1 = list(filter(lambda x: x.pile == pile, doves))
-        agent1 = doves[int(instance1[0].name.split('_')[1])]
-    except:
+    process_piles = list(set(process_piles))
+    print(process_piles)
+    # print(f'Processing {process_piles}')
+    # print('----------------------------')
+
+    print(f'ITERATION START: {len(doves)} doves | {len(hawks)} hawks')
+    for pile in sorted(process_piles):
         try:
-            instance1 = list(filter(lambda x: x.pile == pile, hawks))
-            agent1 = hawks[int(instance1[0].name.split('_')[1])]
+            instance1 = list(filter(lambda x: x.pile == pile, doves))
+            agent1 = doves[hawks.index(instance1[0])]
         except:
-            agent1 = None
-    agent1.pile = None
-    # print(f'agent1 is {agent1}')
-
-    try:
-        instance2 = list(filter(lambda x: x.pile == pile, doves))
-        agent2 = doves[int(instance2[0].name.split('_')[1])]
-    except:
+            try:
+                instance1 = list(filter(lambda x: x.pile == pile, hawks))
+                agent1 = hawks[hawks.index(instance1[0])]
+            except:
+                agent1 = None
         try:
-            instance2 = list(filter(lambda x: x.pile == pile, hawks))
-            agent2 = hawks[int(instance2[0].name.split('_')[1])]
+            agent1.pile = None
         except:
-            agent2 = None
-    # print(f'agent2 is {agent2}')
+            pass
 
-    env.play(agent1, agent2)
+        try:
+            instance2 = list(filter(lambda x: x.pile == pile, doves))
+            agent2 = doves[doves.index(instance2[0])]
+        except:
+            try:
+                instance2 = list(filter(lambda x: x.pile == pile, hawks))
+                agent2 = hawks[hawks.index(instance2[0])]
+            except:
+                agent2 = None
+        try:
+            agent2.pile = None
+        except:
+            pass
+        # print(f'agent2 is {agent2}')
+        env.play(agent1, agent2)
+
+
+    new_doves = doves.copy()
+    new_hawks = hawks.copy()
 
     for dove in doves:
         if dove.score == 0:
-            doves.remove(dove)
+            new_doves.remove(dove)
         elif dove.score == 0.5:
             if random.randint(0,1) == 0:
-                doves.remove(dove)
+                new_doves.remove(dove)
             else:
                 pass
         elif dove.score == 1:
@@ -128,16 +139,15 @@ for pile in sorted(process_piles):
             if random.randint(0,1) == 0:
                 pass
             else:
-                doves.append(Dove())
+                new_doves.append(Dove())
         else:
-            doves.append(Dove())
-
+            new_doves.append(Dove())
     for hawk in hawks:
         if hawk.score == 0:
-            hawks.remove(hawk)
+            new_hawks.remove(hawk)
         elif hawk.score == 0.5:
             if random.randint(0,1) == 0:
-                hawks.remove(hawk)
+                new_hawks.remove(hawk)
             else:
                 pass
         elif hawk.score == 1:
@@ -146,30 +156,37 @@ for pile in sorted(process_piles):
             if random.randint(0,1) == 0:
                 pass
             else:
-                hawks.append(Hawk())
+                new_hawks.append(Hawk())
         else:
-            hawks.append(Hawk())
+            new_hawks.append(Hawk())
 
-# plotting stacked chart
+        doves = new_doves
+        hawks = new_hawks
 
-    # print(f'Processing {process_piles}')
-    # print('----------------------------')
+    print(f'ITERATION END: {len(doves)} doves | {len(hawks)} hawks\n')
+    result.append({'iteration': i, 'doves': len(doves), 'hawks': len(hawks)})
+    doves = new_doves
+    hawks = new_hawks
 
-    # print(f'{doves[0].name} = {doves[0].score}, '
-    #       f'{doves[1].name} = {doves[1].score}, '
-    #       f'{doves[2].name} = {doves[2].score}, '
-    #       f'{doves[3].name} = {doves[3].score}, '
-    #
-    #       f'{hawks[0].name} = {hawks[0].score}, '
-    #       f'{hawks[1].name} = {hawks[1].score},'
-    #       f'{hawks[2].name} = {hawks[2].score}')
+print(result)
+# Extracting result
+iterations = [entry['iteration'] for entry in result]
+dove_counts = [entry['doves'] for entry in result]
+hawk_counts = [entry['hawks'] for entry in result]
 
-# name = list(instance)[0].name
-    # print(f'dove {name}')
+# Calculate total counts
+total_counts = [d + h for d, h in zip(dove_counts, hawk_counts)]
 
+# Stackplot
+plt.stackplot(iterations, dove_counts, hawk_counts, labels=['Doves', 'Hawks'], colors=['blue', 'red'])
 
+# Add labels and title
+plt.xlabel('Iterations')
+plt.ylabel('Species Counts')
+plt.legend(loc='upper left')
+plt.title('Doves and Hawks Population Over Iterations')
 
-    # get_bird = name.split('_')[1]
-    # print(get_bird)
+# Display the legend
 
-
+# Show the plot
+plt.show()
