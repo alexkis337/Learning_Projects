@@ -10,4 +10,4 @@ class Solution(object):
         else:
             return False
 
-print(Solution.isPalindrome(1331))
+print(Solution.isPalindrome(133451))

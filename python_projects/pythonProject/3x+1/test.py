@@ -1,8 +1,11 @@
+import random
+#
 import matplotlib
 import matplotlib.pyplot as plt
 
 
 def func(x):
+    inp = x
     arr_x = []
     arr_y = []
     i = 0
@@ -14,10 +17,12 @@ def func(x):
         i += 1
         arr_x.append(i)
         arr_y.append(x)
-    print(i)
 
     plt.figure()
     plt.plot(arr_x, arr_y)
+    plt.legend([f'(x={inp})'])
     plt.show()
 
-func(27)
+func(random.randint(1,10000))
+
+
