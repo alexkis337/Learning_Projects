@@ -1,0 +1,7 @@
+with people_lf as (
+select firstname, lastname from people
+where (lastname in (select firstname from people))
+)
+select people.firstname as firstname_cor, people.lastname as lastname_cor, people_lf.firstname as firstname_fal, people_lf.lastname as lastname_fal from people
+join people_lf 
+                on (people_lf.firstname = people.lastname and people_lf.lastname = people.firstname)
