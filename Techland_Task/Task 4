@@ -1,0 +1,102 @@
+1. For Task 2 (TTD one) the idea is to show the difference in weapon's TTD. I would use scatter plot, since we can show difference in TTD for various weapons and at the same time how many players using those weapons
+
+# ##############################################################################################################
+import matplotlib.pyplot as plt
+import random
+
+
+# creating data
+weapons = {'@knife01': random.randint(1,100), '@sword01': random.randint(1,100),
+           '@bow13' : random.randint(1,100), '@club01': random.randint(1,100),
+           '@unicornmagicpistol37' : random.randint(1,100)}
+
+ttd = random.sample(range(1, 100), 5)
+players_num = random.sample(range(42, 900), 5)
+
+# plotting data
+plt.scatter(weapons.keys(), weapons.values(), s=players_num, alpha=0.5)
+plt.title('Weapons vs Time to Death')
+plt.xlabel('Weapons')
+plt.ylabel('Time to Death')
+plt.legend(['Players Number'], loc='upper right')
+plt.show()
+# ##############################################################################################################
+
+2. For task 3 I would use stacked bar so we can see total distribution between weapons along with shares of each perk (trinket/skin) within each weapon.
+
+# ##############################################################################################################
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# creating data
+data = {
+    'weapon': ['@knife01', '@sword01', '@bow13', '@club01', '@unicornmagicpistol37'],
+    'perk_noperk': [0, 0, 0, 3, 0],
+    'perk_speed': [3, 2, 2, 0, 3],
+    'perk_damage': [5, 3, 5, 0, 5],
+    'perk_range': [1, 5, 1, 0, 1],
+    'perk_legendary': [0, 0, 0, 0, 1]
+}
+
+
+
+df = pd.DataFrame(data)
+df.set_index('weapon', inplace=True)
+df.plot(kind='bar', stacked=True, colormap='viridis', figsize=(10, 6))
+
+# y limit set for more visual appeal so legend doesn't overlap with the bars
+plt.ylim(0, 15)
+plt.title('Weapon Perks Distribution', fontsize=16)
+plt.xlabel('Weapon', fontsize=12)
+plt.ylabel('Count', fontsize=12)
+plt.legend(title='Perk', loc='upper right')
+plt.xticks(rotation=45)
+
+# Show the plot
+plt.show()
+# ##############################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

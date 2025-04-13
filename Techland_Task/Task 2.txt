@@ -1,0 +1,165 @@
+# #####################################################################################################################################################
+# Query to create tables and fill some synthetic data
+
+CREATE TABLE test_damage_applied (
+    event_name VARCHAR(50) NOT NULL,
+    player_id VARCHAR(255),
+    match_id VARCHAR(255) NOT NULL,
+    attack_id INT,
+    damage FLOAT,
+    object_type VARCHAR(50),
+    ts TIMESTAMP NOT NULL,
+    attacker_player_id VARCHAR(255),
+    is_deadly BOOLEAN
+);
+
+
+INSERT INTO test_damage_applied (event_name, player_id, match_id, attack_id, damage, object_type, ts, attacker_player_id, is_deadly)
+VALUES
+    ('test_damage_applied', 2, 'Kr82P17X8w', 25, 46.00, 'player', '2024-10-08 7:12:00', 1, FALSE),
+    ('test_damage_applied', 1, 'Kr82P17X8w', 26, 43.00, 'player', '2024-10-08 7:12:01', 2, FALSE),
+    ('test_damage_applied', 2, 'Kr82P17X8w', 29, 41.00, 'player', '2024-10-08 7:36:03', 1, TRUE),
+    ('test_damage_applied', 3, 'Kr82P17X8w', 30, 63.00, 'player', '2024-10-08 12:37:40', 1, FALSE),
+    ('test_damage_applied', 1, 'Kr82P17X8w', 42, 68.00, 'player', '2024-10-08 12:37:41', 3, FALSE),
+    ('test_damage_applied', 1, 'Kr82P17X8w', 44, 60.00, 'player', '2024-10-08 12:37:42', 3, FALSE),
+    ('test_damage_applied', 3, 'Kr82P17X8w', 46, 42.00, 'player', '2024-10-08 12:39:43', 1, FALSE),
+    ('test_damage_applied', 5, 'Kr82P17X8w', 47, 33.00, 'player', '2024-10-08 12:39:49', 4, FALSE),
+    ('test_damage_applied', 4, 'Kr82P17X8w', 49, 55.00, 'player', '2024-10-08 12:39:51', 5, FALSE),
+    ('test_damage_applied', 5, 'Kr82P17X8w', 50, 45.00, 'player', '2024-10-08 12:39:53', 4, FALSE),
+    ('test_damage_applied', 1, 'Kr82P17X8w', 52, 32.00, 'player', '2024-10-08 12:39:54', 3, FALSE),
+    ('test_damage_applied', 3, 'Kr82P17X8w', 53, 38.00, 'player', '2024-10-08 12:39:55', 1, TRUE),
+    ('test_damage_applied', 5, 'Kr82P17X8w', 54, 20.00, 'player', '2024-10-08 12:39:56', 4, TRUE);
+
+
+
+
+
+CREATE TABLE test_attack (
+    event_name VARCHAR(50) NOT NULL,
+    player_id VARCHAR(255),
+    match_id VARCHAR(255) NOT NULL,
+    attack_id INT,
+    attack_type VARCHAR(50),
+    ts TIMESTAMP NOT NULL,
+    item_id VARCHAR(255),
+    item_appearance_id INT
+);
+
+
+
+INSERT INTO test_attack (event_name, player_id, match_id, attack_id, attack_type, ts, item_id, item_appearance_id)
+VALUES
+    ('test_attack', '1', 'UxG9E98Qa0', 25, 'melee', '2024-10-08 12:35:40.287', '@hatchet_01', NULL),
+    ('test_attack', '2', 'UxG9E98Qa0', 26, 'ranged', '2024-10-08 12:36:02.501', '@crossbow_02', 3),
+    ('test_attack', '1', 'UxG9E98Qa0', 29, 'melee', '2024-10-08 12:36:02.650', '@hatchet_01', NULL),
+    ('test_attack', '2', '14LvN663kJ', 30, 'melee', '2024-11-07 14:22:00', '@knife_01', 4),
+    ('test_attack', '2', '14LvN663kJ', 42, 'melee', '2024-11-07 14:23:01.010', '@knife_01', 5),
+    ('test_attack', '1', '14LvN663kJ', 44, 'aoe', '2024-11-07 14:23:01.111', '@torch', NULL);
+
+
+CREATE TABLE test_item_appearance (
+    event_name VARCHAR(50) NOT NULL,
+    player_id VARCHAR(255),
+    ts TIMESTAMP NOT NULL,
+    item_id VARCHAR(255),
+    item_appearance_id INT,
+    attached_entities VARCHAR(255)
+);
+
+
+INSERT INTO test_item_appearance (event_name, player_id, ts, item_id, item_appearance_id, attached_entities)
+VALUES
+    ('test_item_appearance', '982k2024-l90s', '2024-11-07 14:20:00.000', '@knife_01', 4, '-;game_logo_tricnket01;red_skin'),
+    ('test_item_appearance', '982k2024-l90s', '2024-11-07 14:22:58.442', '@knife_01', 5, '-;game_logo_tricnket01;-'),
+    ('test_item_appearance', '982k2024-l90s', '2024-11-08 23:55:00.000', '@bow_13', 1, 'sharpshooter;-;-');
+
+# #####################################################################################################################################################
+
+# Query itself
+WITH cte AS (
+    SELECT 
+        test_damage_applied.ts, 
+        match_id,
+        DENSE_RANK() OVER (ORDER BY CONCAT(LEAST(test_damage_applied.player_id, attacker_player_id), GREATEST(test_damage_applied.player_id, attacker_player_id))) AS combat_id, test_attack.attack_id, item_id
+    FROM test_damage_applied
+    JOIN (SELECT attack_id, item_id from test_attack) as test_attack 
+    ON test_damage_applied.attack_id = test_attack.attack_id
+  )
+SELECT combat_id, item_id, (MAX(ts) - MIN(ts))/COUNT(item_id) as TTD FROM cte
+GROUP BY combat_id, item_id
+
+
+# Output
++-----------+--------------+-----------+
+| combat_id | item_id      | TTD       |
++-----------+--------------+-----------+
+|         1 | @hatchet_01  | 1201.5000 |
+|         1 | @crossbow_02 |    0.0000 |
+|         2 | @knife_01    |    0.5000 |
+|         2 | @torch       |    0.0000 |
++-----------+--------------+-----------+
+
+
+# Comments 
+the idea behind this query is to split all the damage instances beteween pairwise players into separate combat_ids in cte and after that 
+we take time how much time it took for each weapon to kill within each combat
+
+there are also a lot of things to revise:
+1. If the combat resulted in no death, do we add the whole time to some kind of global TTD time?
+2. If the player switched weapon (if possible) do the TTD timer starts from the first damage? Or the combat time should be used for both weapons?
+3. TTD calculations may vary upon different definitions (should it be global value, calced across multiple matches? or we need more granular for each match? or combat? or average per player?)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

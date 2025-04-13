@@ -1,0 +1,12 @@
+1. The combat is a sequence of attacks (which results in damage instances) done by players to each other or mobs (if mobs are agressive and serves for the purpose of looting or leveling, otherwise I would not include them into combat definition).  
+    As we are talking about FFA, the combat might be not limited to have only 2 players. So any additional player will join the ongoing combat. NOTE: here rises an issue, that if 2 players (A, B) starts combat and 2 more players in their combat (C, D) joins the initial combat we would need to assign the merged combat new id, but this can lead to losing the relation between all those combats and we would need new column like merged_combat and have links to original or whatever. 
+For now I would avoid merging combats and limit them to 2 players.
+
+2. The combat starts when player damages another player (damage instance appears). I suggest starting the combat from the damage sequence and not from the damage, because (a) player can just run and attack air (for purposes of pure joy for sure) and (b) attack insatance has no "target" while test_damage_applied has field object_type.
+2.1 Also I think that might be good idea that if the attack on player is missed to display it as 0 damage. 
+
+3. Combat ends after one of players is dead (test_damage_applied.is_deadly = True).
+3.1 I would rather add "or if 5 seconds elapsed since last damage (test_damage_applied.ts).", but for the purpose of simplicity I would avoid this definition for now. Since it results in additional difficulties in following tasks. 
+3.2 I am not sure if missed attacks should restart the 5 sec timer of combat or not (this is something needs to be discussed)
+
+4. If players exit the combat and then start fighting again, the combat ID remains the same

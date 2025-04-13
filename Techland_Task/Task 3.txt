@@ -1,0 +1,92 @@
+# A couple of words before
+1. Would be nice to define term most "powerful". This could be:
+    - smallest TTD (we can reuse query from Task 2)
+    - highest DPS
+    - highest total damage
+    - most common one (if META exists, people would tend to use the best item/trinket/etc). Cause there might be some 'hidden' buffs
+2. I would stick with the definition that most powerful - is the most used (you dont want to nerf some REALY COOL unobvious things until they become common)
+
+
+#  Query
+SELECT 
+    item_id, 
+    MAX(LEFT(attached_entities, LOCATE(';', attached_entities) - 1)) AS perk, 
+    COUNT(LEFT(attached_entities, LOCATE(';', attached_entities) - 1)) AS perk_count
+FROM 
+    test_item_appearance
+GROUP BY 
+    item_id;
+
+
+# Output
++-----------+--------------+------------+
+| item_id   | perk         | perk_count |
++-----------+--------------+------------+
+| @knife_01 | -            |          2 |
+| @bow_13   | sharpshooter |          1 |
++-----------+--------------+------------+
+
+
+# Commments
+/*  
+this query shows us most used perks for each weapon
+
+
+if we wanted to use TTD as a metric, we could use table from previous Task as CTE (or create a materialized view, whatever)
+Join the table containning TTD with test_item_appearance (on item_id), group by item, perk and get average TTD
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
